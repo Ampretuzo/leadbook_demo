@@ -3,3 +3,5 @@ Scrapy==1.6.0
 
 # dev
 pip-tools==3.5.0
+pudb==2018.1
+pre-commit==1.14.4
