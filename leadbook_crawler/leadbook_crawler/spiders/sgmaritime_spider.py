@@ -11,9 +11,7 @@ class SgmaritimeCompaniesSpider(scrapy.Spider):
 
     start_urls = ["https://www.sgmaritime.com/company-listings?page=329"]
 
-    def _parse_companies_from_page(self, response):
-        return
-        # TODO: enable company parsing
+    def _load_company_pages(self, response):
         companies_link_extractor = LinkExtractor(allow=r"/companies/.+")
         for company_link in companies_link_extractor.extract_links(response):
             yield SplashRequest(
@@ -24,7 +22,22 @@ class SgmaritimeCompaniesSpider(scrapy.Spider):
                     # TODO
                 },
             )
-            return
+
+    def _parse_companies_from_page(self, response):
+        listing_container_selector = response.selector.xpath(
+            "//div[@id='Contentplaceholder1_C025_Col00'][1]/div[last()]"
+        )
+        company_listing_selectors = listing_container_selector.xpath(
+            "div[@class='row']/div[@class='company-listing']"
+        )
+        for company_listing_selector in company_listing_selectors:
+            company_details_selector = company_listing_selector.xpath(
+                "div[contains(concat(' ', @class, ' '), ' company-details ')][1]"
+            )
+            company_url_relative = company_details_selector.xpath("p/a/@href").get()
+            company_url = response.urljoin(company_url_relative)
+            # TODO: continue
+        pass
 
     def _on_last_page(self, response):
         pagination_items = response.selector.xpath("//ul[@class = 'pagination']/li")
