@@ -49,8 +49,9 @@ class SgmaritimeCompaniesSpider(scrapy.Spider):
                 url=response.urljoin(url_relative),
                 crawled_on=datetime.utcnow(),
             )
-        for _ in self._load_company_pages(response):
-            yield _
+            yield response.follow(url_relative, callback=self.parse_company)
+        # for _ in self._load_company_pages(response):
+        #     yield _
 
     def _on_last_page(self, response):
         pagination_items = response.selector.xpath("//ul[@class = 'pagination']/li")
@@ -115,11 +116,13 @@ class SgmaritimeCompaniesSpider(scrapy.Spider):
                 "category",
                 "//div[contains(concat(' ', @class, ' '), ' company-profile ')][.//h2/text() = 'Categories']//div[contains(concat(' ', @class, ' '), ' company-description ')]//a/text()",
             )
+            loader.add_xpath("company_phone_number", "//div[@id='valuephone']/a/@href")
+            loader.add_xpath("company_website", "//div[@id='valuewebsite']/a/@href")
+            # TODO: add these after providing Lua script for Splash
+            # loader.add_xpath('company_email', "")
 
-        # TODO: add these after providing Lua script for Splash
-        # loader.add_xpath('company_phone_number', "")
         # loader.add_xpath('business', "")
-        # loader.add_xpath('company_website', "")
-        # loader.add_xpath('company_email', "")
         # loader.add_xpath('contacts', "")
+
+        item = loader.load_item()
         yield item
