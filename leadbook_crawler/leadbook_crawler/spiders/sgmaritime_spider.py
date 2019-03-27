@@ -12,7 +12,7 @@ from leadbook_crawler.items import (
     SgmaritimeCompanyIndexItem,
     SgmaritimeCompanyProfileItem,
 )
-
+from leadbook_crawler.items import SgmaritimeCompanyProfileItemLoader
 
 settings = get_project_settings()
 
@@ -98,7 +98,9 @@ class SgmaritimeCompaniesSpider(scrapy.Spider):
 
     def parse_company(self, response):
         item = None
-        loader = ItemLoader(item=SgmaritimeCompanyProfileItem(), response=response)
+        loader = SgmaritimeCompanyProfileItemLoader(
+            item=SgmaritimeCompanyProfileItem(), response=response
+        )
         # Below three values are placed in html in a very volatile way - I prefer to separate them:
         if self._company_page_full(response):
             loader.add_xpath(
@@ -106,7 +108,7 @@ class SgmaritimeCompaniesSpider(scrapy.Spider):
                 "//div[contains(concat(' ', @class, ' '), ' company-details ')]/h3/text()",
             )
             loader.add_xpath(
-                "company_streetaddress",
+                "company_street_address",
                 "//div[contains(concat(' ', @class, ' '), ' company-contact ')]/p[1]/text()",
             )
             loader.add_xpath(
@@ -119,7 +121,7 @@ class SgmaritimeCompaniesSpider(scrapy.Spider):
                 "//div[contains(concat(' ', @class, ' '), ' company-details ')]/text()",
             )
             loader.add_xpath(
-                "company_streetaddress",
+                "company_street_address",
                 "//div[contains(concat(' ', @class, ' '), ' company-contact ')]/p[1]/text()",
             )
             loader.add_xpath(
