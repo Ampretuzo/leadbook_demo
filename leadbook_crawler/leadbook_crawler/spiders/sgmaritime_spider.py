@@ -57,7 +57,6 @@ class SgmaritimeCompaniesSpider(scrapy.Spider):
                 url=response.urljoin(url_relative),
                 crawled_on=datetime.utcnow(),
             )
-            # yield response.follow(url_relative, callback=self.parse_company)
         for _ in self._load_company_pages(response):
             yield _
 
@@ -134,7 +133,7 @@ class SgmaritimeCompaniesSpider(scrapy.Spider):
         )
         loader.add_xpath(
             "category",
-            "//div[contains(concat(' ', @class, ' '), ' company-profile ')][.//h2/text() = 'Categories']//div[contains(concat(' ', @class, ' '), ' company-description ')]//a/text()",
+            "//div[contains(concat(' ', @class, ' '), ' company-profile ')][.//h2/text() = 'Categories']//li/a[2]/text()",
         )
         loader.add_xpath("company_phone_number", "//div[@id='valuephone']/a/@href")
         loader.add_xpath("company_website", "//div[@id='valuewebsite']/a/@href")
@@ -145,9 +144,14 @@ class SgmaritimeCompaniesSpider(scrapy.Spider):
             "company_email",
             "//*[@id='enquiry-contentblock' and not(contains(@style, 'none'))]//*[@id='companyEmail']/text()",
         )
-        # TODO
-        # loader.add_xpath('business', "")
-        # loader.add_xpath('contacts', "")
+        loader.add_xpath(
+            "business",
+            "//div[contains(concat(' ', @class, ' '), ' company-profile ')][.//h2/text() = 'Categories']//li/a[1]/text()",
+        )
+        loader.add_xpath(
+            "contacts",
+            "//div[contains(concat(' ', @class, ' '), ' company-contact ')]//p[2]",
+        )
 
         item = loader.load_item()
         yield item
