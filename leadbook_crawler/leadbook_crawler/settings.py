@@ -103,3 +103,6 @@ SPIDER_MIDDLEWARES = {"scrapy_splash.SplashDeduplicateArgsMiddleware": 100}
 
 DUPEFILTER_CLASS = "scrapy_splash.SplashAwareDupeFilter"
 HTTPCACHE_STORAGE = "scrapy_splash.SplashAwareFSCacheStorage"
+
+# Custom settings
+SGMARITIME_COMPANY_LUA_PATH = "splash_scripts/sgmaritime_company.lua"

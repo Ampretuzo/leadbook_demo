@@ -6,6 +6,7 @@ from scrapy_splash import SplashRequest
 from scrapy.linkextractors import LinkExtractor
 from scrapy.shell import inspect_response
 from scrapy.loader import ItemLoader
+from scrapy.utils.project import get_project_settings
 
 from leadbook_crawler.items import (
     SgmaritimeCompanyIndexItem,
@@ -13,10 +14,19 @@ from leadbook_crawler.items import (
 )
 
 
+settings = get_project_settings()
+
+
 class SgmaritimeCompaniesSpider(scrapy.Spider):
     name = "sgmaritime_companies"
 
-    start_urls = ["https://www.sgmaritime.com/company-listings?page=329"]
+    start_urls = ["https://www.sgmaritime.com/company-listings?page=1"]
+
+    def __init__(self, *args, **kwargs):
+        super(SgmaritimeCompaniesSpider, self).__init__(*args, **kwargs)
+        script_path = settings.get("SGMARITIME_COMPANY_LUA_PATH", None)
+        assert script_path is not None
+        self.splash_lua_source = open(script_path, "r").read()
 
     def _load_company_pages(self, response):
         companies_link_extractor = LinkExtractor(allow=r"/companies/.+")
@@ -24,10 +34,8 @@ class SgmaritimeCompaniesSpider(scrapy.Spider):
             yield SplashRequest(
                 company_link.url,
                 self.parse_company,
-                endpoint="render.html",
-                args={
-                    # TODO
-                },
+                endpoint="execute",
+                args={"lua_source": self.splash_lua_source},
             )
 
     def _parse_companies_from_page(self, response):
@@ -49,9 +57,9 @@ class SgmaritimeCompaniesSpider(scrapy.Spider):
                 url=response.urljoin(url_relative),
                 crawled_on=datetime.utcnow(),
             )
-            yield response.follow(url_relative, callback=self.parse_company)
-        # for _ in self._load_company_pages(response):
-        #     yield _
+            # yield response.follow(url_relative, callback=self.parse_company)
+        for _ in self._load_company_pages(response):
+            yield _
 
     def _on_last_page(self, response):
         pagination_items = response.selector.xpath("//ul[@class = 'pagination']/li")
@@ -92,35 +100,52 @@ class SgmaritimeCompaniesSpider(scrapy.Spider):
     def parse_company(self, response):
         item = None
         loader = ItemLoader(item=SgmaritimeCompanyProfileItem(), response=response)
+        # Below three values are placed in html in a very volatile way - I prefer to separate them:
         if self._company_page_full(response):
-            pass
+            loader.add_xpath(
+                "company_name",
+                "//div[contains(concat(' ', @class, ' '), ' company-details ')]/h3/text()",
+            )
+            loader.add_xpath(
+                "company_streetaddress",
+                "//div[contains(concat(' ', @class, ' '), ' company-contact ')]/p[1]/text()",
+            )
+            loader.add_xpath(
+                "country",
+                "//div[contains(concat(' ', @class, ' '), ' company-contact ')]/p[1]/text()",
+            )
         else:
             loader.add_xpath(
                 "company_name",
                 "//div[contains(concat(' ', @class, ' '), ' company-details ')]/text()",
             )
-            loader.add_value("company_url", response.url)
             loader.add_xpath(
                 "company_streetaddress",
-                "//div[contains(concat(' ', @class, ' '), ' company-details ')]//div[contains(concat(' ', @class, ' '), ' company-contact ')]/p[1]/text()",
+                "//div[contains(concat(' ', @class, ' '), ' company-contact ')]/p[1]/text()",
             )
             loader.add_xpath(
                 "country",
-                "//div[contains(concat(' ', @class, ' '), ' company-details ')]//div[contains(concat(' ', @class, ' '), ' company-contact ')]/p[1]/text()",
+                "//div[contains(concat(' ', @class, ' '), ' company-contact ')]/p[1]/text()",
             )
-            loader.add_xpath(
-                "company_description",
-                "//div[contains(concat(' ', @class, ' '), ' company-profile ')][.//h2/text() = 'Description']//div[contains(concat(' ', @class, ' '), ' company-description ')]",
-            )
-            loader.add_xpath(
-                "category",
-                "//div[contains(concat(' ', @class, ' '), ' company-profile ')][.//h2/text() = 'Categories']//div[contains(concat(' ', @class, ' '), ' company-description ')]//a/text()",
-            )
-            loader.add_xpath("company_phone_number", "//div[@id='valuephone']/a/@href")
-            loader.add_xpath("company_website", "//div[@id='valuewebsite']/a/@href")
-            # TODO: add these after providing Lua script for Splash
-            # loader.add_xpath('company_email', "")
-
+        loader.add_value("company_url", response.url)
+        loader.add_xpath(
+            "company_description",
+            "//div[contains(concat(' ', @class, ' '), ' company-profile ')][.//h2/text() = 'Description']//div[contains(concat(' ', @class, ' '), ' company-description ')]/text()",
+        )
+        loader.add_xpath(
+            "category",
+            "//div[contains(concat(' ', @class, ' '), ' company-profile ')][.//h2/text() = 'Categories']//div[contains(concat(' ', @class, ' '), ' company-description ')]//a/text()",
+        )
+        loader.add_xpath("company_phone_number", "//div[@id='valuephone']/a/@href")
+        loader.add_xpath("company_website", "//div[@id='valuewebsite']/a/@href")
+        """NOTE: I absolutely didn't need Splash to parse this - company email was out in the open.
+        I just used Splash to showcase how to parse SPA/Ajax websites.
+        """
+        loader.add_xpath(
+            "company_email",
+            "//*[@id='enquiry-contentblock' and not(contains(@style, 'none'))]//*[@id='companyEmail']/text()",
+        )
+        # TODO
         # loader.add_xpath('business', "")
         # loader.add_xpath('contacts', "")
 
