@@ -1,9 +1,12 @@
 import re
+from datetime import datetime
 
 import scrapy
 from scrapy_splash import SplashRequest
 from scrapy.linkextractors import LinkExtractor
 from scrapy.shell import inspect_response
+
+from leadbook_crawler.items import SgmaritimeCompanyIndexItem
 
 
 class SgmaritimeCompaniesSpider(scrapy.Spider):
@@ -34,10 +37,14 @@ class SgmaritimeCompaniesSpider(scrapy.Spider):
             company_details_selector = company_listing_selector.xpath(
                 "div[contains(concat(' ', @class, ' '), ' company-details ')][1]"
             )
-            company_url_relative = company_details_selector.xpath("p/a/@href").get()
-            company_url = response.urljoin(company_url_relative)
-            # TODO: continue
-        pass
+            url_relative = company_details_selector.xpath("*/a/@href").get()
+            company_name_raw = company_details_selector.xpath("*/a/text()").get()
+            company_name = company_name_raw.strip() if company_name_raw else ""
+            yield SgmaritimeCompanyIndexItem(
+                company_name=company_name,
+                url=response.urljoin(url_relative),
+                crawled_on=datetime.utcnow(),
+            )
 
     def _on_last_page(self, response):
         pagination_items = response.selector.xpath("//ul[@class = 'pagination']/li")
@@ -51,10 +58,17 @@ class SgmaritimeCompaniesSpider(scrapy.Spider):
         pagination_items = response.selector.xpath("//ul[@class = 'pagination']/li")
         return pagination_items[-2].xpath("a")[0]
 
+    def _get_current_page_from_url(self, url):
+        page_number_match = re.search("page=(\d+)", url)
+        if not page_number_match:
+            return 1
+        return int(page_number_match.group(1))
+
     def parse(self, response):
-        current_page = int(re.search("page=(\d+)", response.url).group(1))
+        current_page = self._get_current_page_from_url(response.url)
         self.logger.info("Parsing page #%i", current_page)
-        self._parse_companies_from_page(response)
+        for _ in self._parse_companies_from_page(response):
+            yield _
         next_page_a = self._find_next_page_a(response)
         if next_page_a is None:
             return
