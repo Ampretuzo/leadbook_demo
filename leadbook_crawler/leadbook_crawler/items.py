@@ -67,6 +67,7 @@ class SgmaritimeCompanyProfileItemLoader(scrapy.loader.ItemLoader):
         MapCompose(strip_input, filter_whitespace_input), Join(", ")
     )
     company_street_address_out = TakeFirst()
+    company_url_out = TakeFirst()
     country_in = Compose(
         MapCompose(strip_input, filter_whitespace_input, first_word), lambda v: v[-1]
     )
@@ -74,6 +75,9 @@ class SgmaritimeCompanyProfileItemLoader(scrapy.loader.ItemLoader):
     company_description_in = Compose(
         MapCompose(strip_input, filter_whitespace_input), Join("\n")
     )
+    company_description_out = TakeFirst()
+    company_phone_number_out = TakeFirst()
+    company_website_out = TakeFirst()
     category_in = unique
     business_in = unique
     contacts_in = Compose(
@@ -82,4 +86,5 @@ class SgmaritimeCompanyProfileItemLoader(scrapy.loader.ItemLoader):
         ),
         Join("\n"),
     )
+    contacts_out = TakeFirst()
     company_email_in = MapCompose(strip_input, filter_show_email)
