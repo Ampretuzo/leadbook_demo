@@ -48,21 +48,38 @@ def unique(self, value):
     return list(set(value))
 
 
+def filter_show_email(value):
+    if value or value.lower() == "show email":
+        return None
+    return value
+
+
+def remove_extra_whitespace(value):
+    return " ".join(value.split())
+
+
 class SgmaritimeCompanyProfileItemLoader(scrapy.loader.ItemLoader):
     company_name_in = Compose(
         MapCompose(strip_input, filter_whitespace_input), Join(" - ")
     )
+    company_name_out = TakeFirst()
     company_street_address_in = Compose(
         MapCompose(strip_input, filter_whitespace_input), Join(", ")
     )
+    company_street_address_out = TakeFirst()
     country_in = Compose(
         MapCompose(strip_input, filter_whitespace_input, first_word), lambda v: v[-1]
     )
+    country_out = TakeFirst()
     company_description_in = Compose(
         MapCompose(strip_input, filter_whitespace_input), Join("\n")
     )
     category_in = unique
-    business = unique
-    contacts = Compose(
-        MapCompose(remove_tags, strip_input, filter_whitespace_input), Join("\n")
+    business_in = unique
+    contacts_in = Compose(
+        MapCompose(
+            remove_tags, remove_extra_whitespace, strip_input, filter_whitespace_input
+        ),
+        Join("\n"),
     )
+    company_email_in = MapCompose(strip_input, filter_show_email)
