@@ -1,4 +1,8 @@
 from flask import Flask
+from flask_marshmallow import Marshmallow
+
+
+ma = Marshmallow()
 
 
 def create_app(config="production"):
@@ -12,4 +16,14 @@ def create_app(config="production"):
     else:
         raise Exception("Invalid configuration")
 
+    ma.init_app(app)
+
+    app.add_url_rule("/companies", "companies", views.companies_endpoint)
+    app.add_url_rule(
+        "/companies/<string:company_name>", "company", views.company_endpoint
+    )
+
     return app
+
+
+from app import views
