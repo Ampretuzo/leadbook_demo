@@ -1,8 +1,10 @@
 from flask import Flask
 from flask_marshmallow import Marshmallow
+from flask_pymongo import PyMongo
 
 
 ma = Marshmallow()
+mongo = PyMongo()
 
 
 def create_app(config="production"):
@@ -17,6 +19,7 @@ def create_app(config="production"):
         raise Exception("Invalid configuration")
 
     ma.init_app(app)
+    mongo.init_app(app)
 
     app.add_url_rule("/companies", "companies", views.companies_endpoint)
     app.add_url_rule(

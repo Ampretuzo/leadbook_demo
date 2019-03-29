@@ -11,6 +11,7 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     DEBUG = True
     ENV = "development"
+    MONGO_URI = "mongodb://localhost:27017/leadbook"
 
 
 class TestingConfig(Config):
