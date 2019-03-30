@@ -9,6 +9,9 @@
 #     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
+import os
+import string
+
 BOT_NAME = "leadbook_crawler"
 
 SPIDER_MODULES = ["leadbook_crawler.spiders"]
@@ -64,9 +67,9 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#    'leadbook_crawler.pipelines.LeadbookCrawlerPipeline': 300,
-# }
+ITEM_PIPELINES = {
+    "leadbook_crawler.pipelines.LeadbookCompanyProfileCrawlerPipeline": 300
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -105,4 +108,14 @@ DUPEFILTER_CLASS = "scrapy_splash.SplashAwareDupeFilter"
 HTTPCACHE_STORAGE = "scrapy_splash.SplashAwareFSCacheStorage"
 
 # Custom settings
+
 SGMARITIME_COMPANY_LUA_PATH = "splash_scripts/sgmaritime_company.lua"
+
+_RABBIT_UNAME = os.environ.get("LEADBOOK_RABBIT_UNAME")
+_RABBIT_PWD = os.environ.get("LEADBOOK_RABBIT_PWD")
+_RABBIT_ADDRESS = os.environ.get("LEADBOOK_RABBIT_ADDRESS")
+BROKER_URI = string.Template(
+    "amqp://$broker_uname:$broker_pwd@$broker_address"
+).substitute(
+    broker_uname=_RABBIT_UNAME, broker_pwd=_RABBIT_PWD, broker_address=_RABBIT_ADDRESS
+)

@@ -8,7 +8,7 @@ services:
     container_name: catalog-api
     environment:
       - LEADBOOK_MONGO_DB=${LEADBOOK_MONGO_DB}
-      - LEADBOOK_MONGO_ADDRESS=${LEADBOOK_MONGO_DB}
+      - LEADBOOK_MONGO_ADDRESS=${LEADBOOK_MONGO_ADDRESS}
     depends_on: 
       - catalog-db
     ports:
@@ -29,7 +29,7 @@ services:
     container_name: catalog-updater
     environment:
       - LEADBOOK_MONGO_DB=${LEADBOOK_MONGO_DB}
-      - LEADBOOK_MONGO_ADDRESS=${LEADBOOK_MONGO_DB}
+      - LEADBOOK_MONGO_ADDRESS=${LEADBOOK_MONGO_ADDRESS}
       - LEADBOOK_RABBIT_ADDRESS=${LEADBOOK_RABBIT_ADDRESS}
       - LEADBOOK_RABBIT_UNAME=${LEADBOOK_RABBIT_UNAME}
       - LEADBOOK_RABBIT_PWD=${LEADBOOK_RABBIT_PWD}
@@ -47,3 +47,11 @@ services:
       - 5672:5672
     expose:
       - 5672
+
+  scrapy-splash:
+    image: scrapinghub/splash:3.0
+    container_name: scrapy-splash
+    ports:
+      - 8050:8050
+    expose:
+      - 8050
