@@ -1,4 +1,5 @@
 version: '3'
+
 services:
   companies-catalog-api:
     build:
@@ -6,16 +7,51 @@ services:
     image: catalog-api:latest
     container_name: catalog-api
     environment:
-      - LEADBOOK_MONGO_DB=leadbook
-      - LEADBOOK_MONGO_ADDRESS=catalog-db:27017
+      - LEADBOOK_MONGO_DB=${LEADBOOK_MONGO_DB}
+      - LEADBOOK_MONGO_ADDRESS=${LEADBOOK_MONGO_ADDRESS}
     depends_on: 
       - catalog-db
     ports:
       - 80:8000
+
   catalog-db:
     image: mongo:latest
     container_name: catalog-db
     expose:
-      - "27017"
+      - 27017
     ports:
       - 27017:27017
+
+  catalog-updater:
+    build:
+      context: catalog/catalog_updater
+    image: catalog-updater:latest
+    container_name: catalog-updater
+    environment:
+      - LEADBOOK_MONGO_DB=${LEADBOOK_MONGO_DB}
+      - LEADBOOK_MONGO_ADDRESS=${LEADBOOK_MONGO_ADDRESS}
+      - LEADBOOK_RABBIT_ADDRESS=${LEADBOOK_RABBIT_ADDRESS}
+      - LEADBOOK_RABBIT_UNAME=${LEADBOOK_RABBIT_UNAME}
+      - LEADBOOK_RABBIT_PWD=${LEADBOOK_RABBIT_PWD}
+    depends_on:
+      - rabbitmq
+      - catalog-db
+
+  rabbitmq:
+    image: rabbitmq:3.7.14
+    container_name: leadbook_rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${LEADBOOK_RABBIT_UNAME}
+      - RABBITMQ_DEFAULT_PASS=${LEADBOOK_RABBIT_PWD}
+    ports:
+      - 5672:5672
+    expose:
+      - 5672
+
+  scrapy-splash:
+    image: scrapinghub/splash:3.0
+    container_name: scrapy-splash
+    ports:
+      - 8050:8050
+    expose:
+      - 8050

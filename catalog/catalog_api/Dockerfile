@@ -1,6 +1,4 @@
-FROM ubuntu:latest
-RUN apt-get -q update -y
-RUN apt-get -q install -y python3-pip
+FROM python:3.7.3-alpine3.8
 COPY . /app
 WORKDIR /app
 RUN pip3 install -r requirements.txt
