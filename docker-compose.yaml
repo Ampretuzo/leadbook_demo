@@ -1,0 +1,21 @@
+version: '3'
+services:
+  companies-catalog-api:
+    build:
+      context: catalog/catalog_api
+    image: catalog-api:latest
+    container_name: catalog-api
+    environment:
+      - LEADBOOK_MONGO_DB=leadbook
+      - LEADBOOK_MONGO_ADDRESS=catalog-db:27017
+    depends_on: 
+      - catalog-db
+    ports:
+      - 80:8000
+  catalog-db:
+    image: mongo:latest
+    container_name: catalog-db
+    expose:
+      - "27017"
+    ports:
+      - 27017:27017

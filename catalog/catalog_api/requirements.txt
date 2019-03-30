@@ -8,6 +8,7 @@ click==7.0                # via flask
 flask-marshmallow==0.10.0
 flask-pymongo==2.2.0
 flask==1.0.2
+gunicorn==19.9.0
 itsdangerous==1.1.0       # via flask
 jinja2==2.10              # via flask
 markupsafe==1.1.1         # via jinja2

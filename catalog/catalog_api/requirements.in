@@ -1,3 +1,4 @@
 Flask==1.0.2
 flask-marshmallow==0.10.0
 Flask-PyMongo==2.2.0
+gunicorn==19.9.0
