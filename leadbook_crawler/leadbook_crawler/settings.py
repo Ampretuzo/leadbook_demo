@@ -100,7 +100,11 @@ DOWNLOADER_MIDDLEWARES = {
     "scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware": 810,
 }
 
-SPLASH_URL = "http://localhost:8050/"
+_SPLASH_HOST = os.environ.get("LEADBOOK_SPLASH_HOST")
+_SPLASH_PORT = os.environ.get("LEADBOOK_SPLASH_PORT")
+SPLASH_URL = string.Template("http://$splash_host:$splash_port/").substitute(
+    splash_host=_SPLASH_HOST, splash_port=_SPLASH_PORT
+)
 
 SPIDER_MIDDLEWARES = {"scrapy_splash.SplashDeduplicateArgsMiddleware": 100}
 

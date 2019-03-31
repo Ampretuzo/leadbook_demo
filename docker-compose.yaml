@@ -17,6 +17,8 @@ services:
   catalog-db:
     image: mongo:latest
     container_name: catalog-db
+    volumes:
+      - /data/db
     expose:
       - 27017
     ports:
@@ -43,8 +45,6 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=${LEADBOOK_RABBIT_UNAME}
       - RABBITMQ_DEFAULT_PASS=${LEADBOOK_RABBIT_PWD}
-    ports:
-      - 5672:5672
     expose:
       - 5672
 
@@ -55,3 +55,18 @@ services:
       - 8050:8050
     expose:
       - 8050
+
+  scrapy-crawler:
+    build:
+      context: leadbook_crawler
+    image: scrapy-crawler:latest
+    container_name: scrapy-crawler
+    environment:
+      - LEADBOOK_RABBIT_ADDRESS=${LEADBOOK_RABBIT_ADDRESS}
+      - LEADBOOK_RABBIT_UNAME=${LEADBOOK_RABBIT_UNAME}
+      - LEADBOOK_RABBIT_PWD=${LEADBOOK_RABBIT_PWD}
+      - LEADBOOK_SPLASH_HOST=scrapy-splash
+      - LEADBOOK_SPLASH_PORT=8050
+    depends_on: 
+      - scrapy-splash
+      - catalog-updater

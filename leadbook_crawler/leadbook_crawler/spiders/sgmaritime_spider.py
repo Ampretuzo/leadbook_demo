@@ -77,14 +77,14 @@ class SgmaritimeCompanyIndexSpider(scrapy.Spider):
         yield response.follow(next_page_a, callback=self.parse)
 
 
-class SgmaritimeCompanyIndexSpider(scrapy.Spider):
+class SgmaritimeCompanyProfileSpider(scrapy.Spider):
     """To parse company profies I'm using Splash. I absolutely didn't *need* it, but I figured
     it would be nice to show the integration"""
 
     name = "sgmaritime_company_profiles"
 
     def __init__(self, companies_index_jl_path="", *args, **kwargs):
-        super(SgmaritimeCompanyIndexSpider, self).__init__(*args, **kwargs)
+        super(SgmaritimeCompanyProfileSpider, self).__init__(*args, **kwargs)
         assert companies_index_jl_path
         self.companies_index_jl_path = companies_index_jl_path
         script_path = settings.get("SGMARITIME_COMPANY_LUA_PATH", "")

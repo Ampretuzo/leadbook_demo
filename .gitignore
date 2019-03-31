@@ -101,7 +101,7 @@ celerybeat-schedule
 *.sage.py
 
 # Environments
-.env
+# .env - Don't ignore .env file, it belongs to docker-compose in our case
 .venv
 env/
 venv/

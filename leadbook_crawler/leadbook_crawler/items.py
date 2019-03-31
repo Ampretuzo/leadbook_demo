@@ -69,7 +69,8 @@ class SgmaritimeCompanyProfileItemLoader(scrapy.loader.ItemLoader):
     company_street_address_out = TakeFirst()
     company_url_out = TakeFirst()
     country_in = Compose(
-        MapCompose(strip_input, filter_whitespace_input, first_word), lambda v: v[-1]
+        MapCompose(strip_input, filter_whitespace_input, first_word),
+        lambda v: v[-1] if len(v) > 0 else "",
     )
     country_out = TakeFirst()
     company_description_in = Compose(

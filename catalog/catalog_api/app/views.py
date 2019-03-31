@@ -11,11 +11,6 @@ def companies_endpoint():
     company_search_string = request.args.get("company_name")
     search_dict = {}
     if company_search_string:
-        print(
-            string.Template(".*{search_key}.*").substitute(
-                search_key=company_search_string
-            )
-        )
         search_dict["company_name"] = {
             "$regex": string.Template(".*$search_key.*").substitute(
                 search_key=company_search_string
