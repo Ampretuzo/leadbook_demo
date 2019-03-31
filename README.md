@@ -27,8 +27,8 @@
     
 	This not only does create `company_profiles.jl` file, but sends the data to `catalog-updater` service. Scrapy does not know anything about what kind of database is used, just like the API service. Only thing it does is enqueueing Celery tasks.
 
-<!-- ### Architecture -->
-
+### Architecture
+![alt text](https://raw.githubusercontent.com/Ampretuzo/leadbook_demo/master/architecture.jpg "Logo Title Text 1")
 
 ### Notes
 - We absolutely didn't have to use `Splash` to execute JavaScript activity - all the information was actually accessible straight via plain html. I integrated it just to demonstrate how web crawling/scraping works when we're dealing with JS-heavy websites.
